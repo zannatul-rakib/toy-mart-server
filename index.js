@@ -27,6 +27,7 @@ async function run() {
     client.connect();
 
     const toysCollection = client.db("toyMart").collection("toys");
+    const toysCartCollection = client.db("toyMart").collection("toysCart");
 
     app.get("/toys", async (req, res) => {
       const cursor = toysCollection.find();
@@ -39,6 +40,31 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const toy = await toysCollection.findOne(query);
       res.send(toy);
+    });
+
+    app.post("/toys", async (req, res) => {
+      const item = req.body;
+      const result = await toysCollection.insertOne(item);
+      res.send(result);
+    });
+
+    // cart collection
+    app.get("/carts", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const result = await toysCartCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.post("/carts", async (req, res) => {
+      const item = req.body;
+      const result = await toysCartCollection.insertOne(item);
+      res.send(result);
+    });
+    app.delete("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const item = await toysCartCollection.deleteOne(query);
+      res.send(item);
     });
 
     // Send a ping to confirm a successful connection
